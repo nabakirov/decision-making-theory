@@ -1,0 +1,93 @@
+tbl_Act-EventCombinations
+tbl_Action_List
+tbl_Event_List
+tbl_ParametersOfEventList
+tbl_SumOfProbabilities
+
+tbl_ActionEvent_List
+tbl_Revenue-Cost
+tbl_ToleranceToPropertyOfEventList
+
+
+qry_CreateAct-EventCombinations
+qry_SumOfProbabilities
+qry_DeleteCombinations
+qry_DeleteSumOfProbabilities
+qry_Action_List
+qry_COL
+qry_ConditionalProfit
+qry_CP_MAX
+qry_EMV
+qry_EOL
+qry_Event_List
+qry_MAX_EMV
+qry_Min_EOL
+qry_SetParametersOfEventList
+qry_SolutionOfTaskByEMV
+qry_SolutionOfTaskByEOL
+qry_WeightedProfit
+qry_WOL
+
+qry_Revenue-Cost
+qry_CP_Cartesian
+
+
+frm_Action_List
+frm_COL
+frm_ConditionalProfit
+frm_CP_MAX
+frm_CreateAct-EventCombinations
+frm_EMV
+frm_EOL
+frm_Event_List
+frm_MAX_EMV
+frm_Min_EOL
+frm_SetParametersOfEventList
+frm_SolutionOfTaskByEMV
+frm_SolutionOfTaskByEOL
+frm_SumOfProbabilities
+frm_WeightedProfit
+frm_WOL
+
+PDK
+PDW
+Prize
+Fine
+
+CP: IIf(([PDK]-[PDW])<0,([PDK]-[PDW])*[Fine]*10,([PDK]-[PDW])*[Prize]*10)
+
+
+
+
+Dim rs As Recordset
+Dim SumOfProbabilities, UFL, OFL, tolerance As Single
+DoCmd.OpenQuery ("qry_DeleteSumOfProbabilities")
+DoCmd.OpenQuery ("qry_SumOfProbabilities")
+Set RstSumOfProbabilities = CurrentDb.OpenRecordset("tbl_SumOfProbabilities")
+With RstSumOfProbabilities
+SumOfProbabilities = !SumOfProbabilities
+End With
+Set tolRS = CurrentDb.OpenRecordset("tbl_ParametersOfEventList")
+With tolRS
+tolRS.MoveFirst
+tolerance = tolRS.Fields(1)
+End With
+'RstParameter.Close
+UFL = 1 - tolerance
+OFL = 1 + tolerance
+Select Case SumOfProbabilities
+Case URL To OFL
+Set rs = CurrentDb.OpenRecordset("tbl_Act-EventCombinations")
+DoCmd.OpenQuery ("qry_DeleteCombinations")
+DoCmd.OpenQuery ("qry_CreateAct-EventCombinations")
+DoCmd.close
+DoCmd.OpenForm "frm_CreateAct-EventCombinations"
+Case Else
+MsgBox (" SumOfProbabilities = " & SumOfProbabilities)
+MsgBox ("SumOfProbabilities is outside of the tolerance = " & tolerance)
+MsgBox ("It means the list of events isn't collectively exhaustive!")
+MsgBox ("Check them and set the right the event's probability " & "Act-Event combinations")
+DoCmd.OpenQuery ("qry_DeleteCombinations")
+DoCmd.close
+DoCmd.OpenForm "frm_CreateAct-EventCombinations"
+End Select
